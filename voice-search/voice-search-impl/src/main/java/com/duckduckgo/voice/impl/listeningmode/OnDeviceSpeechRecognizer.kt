@@ -22,10 +22,12 @@ import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.duckduckgo.di.scopes.ActivityScope
 import com.duckduckgo.voice.impl.listeningmode.OnDeviceSpeechRecognizer.Companion
 import com.duckduckgo.voice.impl.listeningmode.OnDeviceSpeechRecognizer.Event
+import com.google.android.material.snackbar.Snackbar
 import com.squareup.anvil.annotations.ContributesBinding
 import javax.inject.Inject
 import timber.log.Timber
@@ -85,6 +87,7 @@ class DefaultOnDeviceSpeechRecognizer @Inject constructor(
                 SpeechRecognizer.ERROR_NO_MATCH -> _eventHandler(Event.RecognitionTimedOut)
                 else -> Timber.e("SpeechRecognizer error: $error")
             }
+            Toast.makeText(context, "SpeechRecognizer error: $error", Toast.LENGTH_LONG).show()
         }
 
         override fun onResults(results: Bundle?) {
