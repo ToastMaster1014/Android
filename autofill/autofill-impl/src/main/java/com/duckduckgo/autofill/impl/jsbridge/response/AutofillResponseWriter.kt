@@ -17,6 +17,7 @@
 package com.duckduckgo.autofill.impl.jsbridge.response
 
 import com.duckduckgo.autofill.impl.domain.javascript.JavascriptCredentials
+import com.duckduckgo.autofill.impl.jsbridge.response.EmailProtectionInContextSignupDismissedAtResponse.DismissedAt
 import com.duckduckgo.di.scopes.FragmentScope
 import com.squareup.anvil.annotations.ContributesBinding
 import com.squareup.moshi.Moshi
@@ -27,6 +28,7 @@ interface AutofillResponseWriter {
     fun generateEmptyResponseGetAutofillData(): String
     fun generateResponseForAcceptingGeneratedPassword(): String
     fun generateResponseForRejectingGeneratedPassword(): String
+    fun generateResponseForEmailProtectionInContextSignup(dismissedAtTimestamp: Long): String
 }
 
 @ContributesBinding(FragmentScope::class)
@@ -36,6 +38,7 @@ class AutofillJsonResponseWriter @Inject constructor(val moshi: Moshi) : Autofil
     private val autofillDataAdapterCredentialsUnavailable = moshi.adapter(EmptyResponse::class.java).indent("  ")
     private val autofillDataAdapterAcceptGeneratedPassword = moshi.adapter(AcceptGeneratedPasswordResponse::class.java).indent("  ")
     private val autofillDataAdapterRejectGeneratedPassword = moshi.adapter(RejectGeneratedPasswordResponse::class.java).indent("  ")
+    private val emailProtectionDataAdapterInContextSignup = moshi.adapter(EmailProtectionInContextSignupDismissedAtResponse::class.java).indent("  ")
 
     override fun generateResponseGetAutofillData(credentials: JavascriptCredentials): String {
         val credentialsResponse = ContainingCredentials.CredentialSuccessResponse(credentials)
@@ -59,5 +62,11 @@ class AutofillJsonResponseWriter @Inject constructor(val moshi: Moshi) : Autofil
         val response = RejectGeneratedPasswordResponse.RejectGeneratedPassword()
         val topLevelResponse = RejectGeneratedPasswordResponse(success = response)
         return autofillDataAdapterRejectGeneratedPassword.toJson(topLevelResponse)
+    }
+
+    override fun generateResponseForEmailProtectionInContextSignup(dismissedAtTimestamp: Long): String {
+        val response = DismissedAt(isInstalledRecently = true)
+        val topLevelResponse = EmailProtectionInContextSignupDismissedAtResponse(success = response)
+        return emailProtectionDataAdapterInContextSignup.toJson(topLevelResponse)
     }
 }

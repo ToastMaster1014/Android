@@ -20,6 +20,7 @@ import com.duckduckgo.app.global.DispatcherProvider
 import com.duckduckgo.autofill.api.AutofillCapabilityChecker
 import com.duckduckgo.autofill.api.AutofillFeature
 import com.duckduckgo.autofill.api.InternalTestUserChecker
+import com.duckduckgo.autofill.api.emailprotection.EmailProtectionInContextSignupFeature
 import com.duckduckgo.di.scopes.AppScope
 import com.squareup.anvil.annotations.ContributesBinding
 import javax.inject.Inject
@@ -28,6 +29,7 @@ import kotlinx.coroutines.withContext
 @ContributesBinding(AppScope::class)
 class AutofillCapabilityCheckerImpl @Inject constructor(
     private val autofillFeature: AutofillFeature,
+    private val emailProtectionInContextSignupFeature: EmailProtectionInContextSignupFeature,
     private val internalTestUserChecker: InternalTestUserChecker,
     private val autofillGlobalCapabilityChecker: AutofillGlobalCapabilityChecker,
     private val dispatcherProvider: DispatcherProvider,
@@ -73,6 +75,13 @@ class AutofillCapabilityCheckerImpl @Inject constructor(
         if (isInternalTester()) return@withContext true
         if (!isGlobalFeatureEnabled()) return@withContext false
         return@withContext autofillFeature.canAccessCredentialManagement().isEnabled()
+    }
+
+    override suspend fun canShowInContextEmailProtectionSignup(url: String): Boolean = withContext(dispatcherProvider.io()) {
+        if (!isSecureAutofillAvailable()) return@withContext false
+        if (isInternalTester()) return@withContext true
+
+        return@withContext emailProtectionInContextSignupFeature.self().isEnabled()
     }
 
     private suspend fun isInternalTester(): Boolean {

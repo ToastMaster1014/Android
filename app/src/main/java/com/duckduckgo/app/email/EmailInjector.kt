@@ -29,7 +29,8 @@ interface EmailInjector {
 
     fun addJsInterface(
         webView: WebView,
-        onTooltipShown: () -> Unit,
+        onSignedInEmailProtectionPromptShown: () -> Unit,
+        onInContextEmailProtectionSignupPromptShown: () -> Unit,
     )
 
     fun injectAddressInEmailField(
@@ -55,11 +56,12 @@ class EmailInjectorJs(
 
     override fun addJsInterface(
         webView: WebView,
-        onTooltipShown: () -> Unit,
+        onSignedInEmailProtectionPromptShown: () -> Unit,
+        onInContextEmailProtectionSignupPromptShown: () -> Unit,
     ) {
         // We always add the interface irrespectively if the feature is enabled or not
         webView.addJavascriptInterface(
-            EmailJavascriptInterface(emailManager, webView, urlDetector, dispatcherProvider, autofillFeature, autofill, onTooltipShown),
+            EmailJavascriptInterface(emailManager, webView, urlDetector, dispatcherProvider, autofillFeature, autofill, onSignedInEmailProtectionPromptShown, onInContextEmailProtectionSignupPromptShown),
             JAVASCRIPT_INTERFACE_NAME,
         )
     }

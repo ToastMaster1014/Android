@@ -24,6 +24,7 @@ import com.duckduckgo.autofill.api.Autofill
 import com.duckduckgo.autofill.api.AutofillFeature
 import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
+import timber.log.Timber
 
 class EmailJavascriptInterface(
     private val emailManager: EmailManager,
@@ -33,6 +34,7 @@ class EmailJavascriptInterface(
     private val autofillFeature: AutofillFeature,
     private val autofill: Autofill,
     private val showNativeTooltip: () -> Unit,
+    private val showNativeInContextEmailProtectionSignupPrompt: () -> Unit,
 ) {
 
     private fun getUrl(): String? {
@@ -46,10 +48,11 @@ class EmailJavascriptInterface(
         return (url != null && urlDetector.isDuckDuckGoEmailUrl(url))
     }
 
-    private fun isFeatureEnabled() = autofillFeature.self().isEnabled()
+    private fun isAutofillEnabled() = autofillFeature.self().isEnabled()
 
     @JavascriptInterface
     fun isSignedIn(): String {
+        Timber.i("isSignedIn")
         return if (isUrlFromDuckDuckGoEmail()) {
             emailManager.isSignedIn().toString()
         } else {
@@ -59,6 +62,7 @@ class EmailJavascriptInterface(
 
     @JavascriptInterface
     fun getUserData(): String {
+        Timber.i("getUserData")
         return if (isUrlFromDuckDuckGoEmail()) {
             emailManager.getUserData()
         } else {
@@ -99,10 +103,25 @@ class EmailJavascriptInterface(
 
     @JavascriptInterface
     fun showTooltip() {
+        Timber.i("showTooltip")
         getUrl()?.let {
-            if (isFeatureEnabled() && !autofill.isAnException(it)) {
+            if (isAutofillEnabled() && !autofill.isAnException(it)) {
                 showNativeTooltip()
             }
+        }
+    }
+
+    @JavascriptInterface
+    fun showInContextEmailProtectionSignupPrompt() {
+        Timber.i("showInContextEmailProtectionSignupPrompt")
+        getUrl()?.let {
+            // todo add guards around remote config state and exceptions
+
+            // if (isAutofillEnabled() && !autofill.isAnException(it)) {
+            //     showNativeTooltip()
+            // }
+
+            showNativeInContextEmailProtectionSignupPrompt()
         }
     }
 

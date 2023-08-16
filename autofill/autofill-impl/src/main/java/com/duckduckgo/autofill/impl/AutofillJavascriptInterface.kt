@@ -55,11 +55,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.lang.RuntimeException
 
 interface AutofillJavascriptInterface {
 
     @JavascriptInterface
     fun getAutofillData(requestString: String)
+
+    @JavascriptInterface
+    fun getIncontextSignupDismissedAt(data: String)
 
     fun injectCredentials(credentials: LoginCredentials)
     fun injectNoCredentials()
@@ -77,6 +81,8 @@ interface AutofillJavascriptInterface {
     companion object {
         const val INTERFACE_NAME = "BrowserAutofill"
     }
+
+    @JavascriptInterface fun startEmailProtectionSignup(data: String)
 }
 
 @ContributesBinding(FragmentScope::class)
@@ -102,6 +108,7 @@ class AutofillStoredBackJavascriptInterface @Inject constructor(
     private val getAutofillDataJob = ConflatedJob()
     private val storeFormDataJob = ConflatedJob()
     private val injectCredentialsJob = ConflatedJob()
+    private val emailProtectionInContextSignupJob = ConflatedJob()
 
     @JavascriptInterface
     override fun getAutofillData(requestString: String) {
@@ -134,6 +141,23 @@ class AutofillStoredBackJavascriptInterface @Inject constructor(
                 Timber.w("Unable to process request; don't know how to handle request %s", requestString)
             }
         }
+    }
+
+    @JavascriptInterface
+    override fun getIncontextSignupDismissedAt(data: String) {
+        Timber.i("getIncontextSignupDismissedAt called")
+        emailProtectionInContextSignupJob += coroutineScope.launch(dispatcherProvider.io()) {
+            val dismissedAtTimestamp = 0L
+            Timber.e("In here")
+            val jsonResponse = autofillResponseWriter.generateResponseForEmailProtectionInContextSignup(dismissedAtTimestamp)
+            Timber.i("jsonResponse: $jsonResponse")
+            autofillMessagePoster.postMessage(webView, jsonResponse)
+        }
+    }
+
+    @JavascriptInterface
+    override fun startEmailProtectionSignup(data: String) {
+        Timber.i("startEmailProtectionSignup called %s ", data)
     }
 
     private suspend fun handleRequestForPasswordGeneration(
@@ -275,7 +299,9 @@ class AutofillStoredBackJavascriptInterface @Inject constructor(
         Timber.v("Informing JS layer with credentials selected")
         injectCredentialsJob += coroutineScope.launch(dispatcherProvider.default()) {
             val jsCredentials = credentials.asJsCredentials()
-            autofillMessagePoster.postMessage(webView, autofillResponseWriter.generateResponseGetAutofillData(jsCredentials))
+            val jsonResponse = autofillResponseWriter.generateResponseGetAutofillData(jsCredentials)
+            Timber.i("Injecting credentials: %s", jsonResponse)
+            autofillMessagePoster.postMessage(webView, jsonResponse)
         }
     }
 

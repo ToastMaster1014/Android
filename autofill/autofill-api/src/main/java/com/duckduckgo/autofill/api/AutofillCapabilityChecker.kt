@@ -44,6 +44,11 @@ interface AutofillCapabilityChecker {
     suspend fun canAccessCredentialManagementScreen(): Boolean
 
     /**
+     * Whether we can show the in-context Email Protection UI.
+     */
+    suspend fun canShowInContextEmailProtectionSignup(url: String): Boolean
+
+    /**
      * Whether autofill is configured to be enabled. This is a configuration value, not a user preference.
      */
     suspend fun isAutofillEnabledByConfiguration(url: String): Boolean

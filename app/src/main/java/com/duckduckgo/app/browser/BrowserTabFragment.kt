@@ -1970,7 +1970,9 @@ class BrowserTabFragment :
             it.setFindListener(this)
             loginDetector.addLoginDetection(it) { viewModel.loginDetected() }
             blobConverterInjector.addJsInterface(it) { url, mimeType -> viewModel.requestFileDownload(url, null, mimeType, true) }
-            emailInjector.addJsInterface(it) { viewModel.showEmailTooltip() }
+            emailInjector.addJsInterface(it,
+                onSignedInEmailProtectionPromptShown =  { viewModel.showEmailTooltip() },
+                    onInContextEmailProtectionSignupPromptShown = { viewModel.showEmailProtectionInContextSignUpPrompt() })
             configureWebViewForAutofill(it)
             printInjector.addJsInterface(it) { viewModel.printFromWebView() }
             autoconsent.addJsInterface(it, autoconsentCallback)

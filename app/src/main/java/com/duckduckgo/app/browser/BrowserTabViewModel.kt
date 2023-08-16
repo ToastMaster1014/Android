@@ -33,6 +33,7 @@ import android.webkit.WebChromeClient
 import android.webkit.WebView
 import androidx.annotation.AnyThread
 import androidx.annotation.VisibleForTesting
+import androidx.appcompat.app.AlertDialog
 import androidx.core.net.toUri
 import androidx.lifecycle.*
 import androidx.lifecycle.Observer
@@ -2911,6 +2912,10 @@ class BrowserTabViewModel @Inject constructor(
         } else {
             PrintAttributes.MediaSize.ISO_A4
         }
+    }
+
+    fun showEmailProtectionInContextSignUpPrompt() {
+        Timber.i("Email protection in context sign up prompt shown")
     }
 
     companion object {

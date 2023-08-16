@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package com.duckduckgo.autofill.impl.feature.plugin
+package com.duckduckgo.autofill.impl.feature.plugin.emailprotection
 
 import com.duckduckgo.anvil.annotations.ContributesRemoteFeature
-import com.duckduckgo.autofill.api.AutofillFeature
+import com.duckduckgo.autofill.api.emailprotection.EmailProtectionInContextSignupFeature
+import com.duckduckgo.autofill.impl.feature.plugin.AutofillFeatureExceptionStore
 import com.duckduckgo.di.scopes.AppScope
 
 @ContributesRemoteFeature(
     scope = AppScope::class,
-    boundType = AutofillFeature::class,
+    boundType = EmailProtectionInContextSignupFeature::class,
     featureName = "incontextSignup",
-    exceptionsStore = AutofillFeatureExceptionStore::class,
+    exceptionsStore = EmailProtectionInContextSignupSettingsStore::class,
 )
 @Suppress("unused")
 private interface UnusedEmailProtectionInContextSignupRemoteFeatureCodegenTrigger

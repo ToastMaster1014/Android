@@ -55,7 +55,10 @@ class RealAutofillRuntimeConfigProvider @Inject constructor(
             credentialSaving = canSaveCredentials(url),
             passwordGeneration = canGeneratePasswords(url),
             showInlineKeyIcon = true,
-        )
+            showInContextEmailProtectionSignup = canShowInContextEmailProtectionSignup(url),
+        ).also {
+            Timber.v("Generated userPreferences: %s", it)
+        }
         val availableInputTypes = generateAvailableInputTypes(url)
 
         return rawJs
@@ -105,6 +108,14 @@ class RealAutofillRuntimeConfigProvider @Inject constructor(
     private suspend fun canGeneratePasswords(url: String?): Boolean {
         if (url == null) return false
         return autofillCapabilityChecker.canGeneratePasswordFromWebView(url)
+    }
+
+    private suspend fun canShowInContextEmailProtectionSignup(url: String?): Boolean {
+        if (url == null) return false
+        //if (determineIfEmailAvailable()) return false
+        return autofillCapabilityChecker.canShowInContextEmailProtectionSignup(url).also {
+            Timber.i("canShowInContextEmailProtectionSignup=%s", it)
+        }
     }
 
     private fun determineIfEmailAvailable(): Boolean = emailManager.isSignedIn()

@@ -65,6 +65,11 @@ class BrowserChromeClient @Inject constructor(
         customView = null
     }
 
+    override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+        Timber.w("console message: ${consoleMessage?.message()} at ${consoleMessage?.sourceId()}:${consoleMessage?.lineNumber()}")
+        return false
+    }
+
     override fun onProgressChanged(
         webView: WebView,
         newProgress: Int,
