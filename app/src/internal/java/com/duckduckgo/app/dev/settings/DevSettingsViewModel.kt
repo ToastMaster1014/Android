@@ -63,7 +63,7 @@ class DevSettingsViewModel @Inject constructor(
     private val command = Channel<Command>(1, BufferOverflow.DROP_OLDEST)
 
     fun start() {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcherProvider.io()) {
             viewState.emit(
                 currentViewState().copy(
                     nextTdsEnabled = devSettingsDataStore.nextTdsEnabled,
@@ -86,7 +86,7 @@ class DevSettingsViewModel @Inject constructor(
     fun onNextTdsToggled(nextTds: Boolean) {
         Timber.i("User toggled next tds, is now enabled: $nextTds")
         devSettingsDataStore.nextTdsEnabled = nextTds
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcherProvider.io()) {
             viewState.emit(currentViewState().copy(nextTdsEnabled = nextTds))
             command.send(Command.SendTdsIntent)
         }
@@ -95,14 +95,14 @@ class DevSettingsViewModel @Inject constructor(
     fun onStartupTraceToggled(value: Boolean) {
         Timber.v("User toggled startup trace, is now enabled: $value")
         startupTraces.isTraceEnabled = value
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcherProvider.io()) {
             viewState.emit(currentViewState().copy(startupTraceEnabled = value))
         }
     }
 
     fun onOverrideUAToggled(enabled: Boolean) {
         devSettingsDataStore.overrideUA = enabled
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcherProvider.io()) {
             viewState.emit(currentViewState().copy(overrideUA = enabled))
         }
     }
@@ -112,16 +112,16 @@ class DevSettingsViewModel @Inject constructor(
     }
 
     fun onUserAgentSelectorClicked() {
-        viewModelScope.launch { command.send(Command.OpenUASelector) }
+        viewModelScope.launch(dispatcherProvider.io()) { command.send(Command.OpenUASelector) }
     }
 
     fun onRemotePrivacyUrlClicked() {
-        viewModelScope.launch { command.send(Command.ChangePrivacyConfigUrl) }
+        viewModelScope.launch(dispatcherProvider.io()) { command.send(Command.ChangePrivacyConfigUrl) }
     }
 
     fun onUserAgentSelected(userAgent: UAOverride) {
         devSettingsDataStore.selectedUA = userAgent
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcherProvider.io()) {
             viewState.emit(currentViewState().copy(userAgent = userAgentProvider.userAgent("", false)))
         }
     }

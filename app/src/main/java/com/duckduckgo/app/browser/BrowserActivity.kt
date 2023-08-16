@@ -46,6 +46,7 @@ import com.duckduckgo.app.feedback.ui.common.FeedbackActivity
 import com.duckduckgo.app.fire.DataClearer
 import com.duckduckgo.app.fire.DataClearerForegroundAppRestartPixel
 import com.duckduckgo.app.global.ApplicationClearDataState
+import com.duckduckgo.app.global.DispatcherProvider
 import com.duckduckgo.app.global.DuckDuckGoActivity
 import com.duckduckgo.app.global.events.db.UserEventsStore
 import com.duckduckgo.app.global.intentText
@@ -118,6 +119,9 @@ open class BrowserActivity : DuckDuckGoActivity() {
     @Inject
     @AppCoroutineScope
     lateinit var appCoroutineScope: CoroutineScope
+
+    @Inject
+    lateinit var dispatcherProvider: DispatcherProvider
 
     private val lastActiveTabs = TabList()
 
@@ -294,7 +298,7 @@ open class BrowserActivity : DuckDuckGoActivity() {
 
         if (intent.getBooleanExtra(PERFORM_FIRE_ON_ENTRY_EXTRA, false)) {
             Timber.i("Clearing everything as a result of $PERFORM_FIRE_ON_ENTRY_EXTRA flag being set")
-            appCoroutineScope.launch {
+            appCoroutineScope.launch(dispatcherProvider.io()) {
                 clearPersonalDataAction.clearTabsAndAllDataAsync(appInForeground = true, shouldFireDataClearPixel = true)
                 clearPersonalDataAction.setAppUsedSinceLastClearFlag(false)
                 clearPersonalDataAction.killAndRestartProcess(notifyDataCleared = false)
@@ -309,7 +313,7 @@ open class BrowserActivity : DuckDuckGoActivity() {
         }
 
         if (intent.getBooleanExtra(FAVORITES_ONBOARDING_EXTRA, false)) {
-            lifecycleScope.launch {
+            lifecycleScope.launch(dispatcherProvider.io()) {
                 val tabId = viewModel.onNewTabRequested()
                 openFavoritesOnboardingNewTab(tabId)
             }
@@ -318,7 +322,7 @@ open class BrowserActivity : DuckDuckGoActivity() {
 
         if (launchNewSearch(intent)) {
             Timber.w("new tab requested")
-            lifecycleScope.launch { viewModel.onNewTabRequested() }
+            lifecycleScope.launch(dispatcherProvider.io()) { viewModel.onNewTabRequested() }
             return
         }
 
@@ -326,14 +330,14 @@ open class BrowserActivity : DuckDuckGoActivity() {
         if (sharedText != null) {
             if (intent.getBooleanExtra(ShortcutBuilder.SHORTCUT_EXTRA_ARG, false)) {
                 Timber.d("Shortcut opened with url $sharedText")
-                lifecycleScope.launch { viewModel.onOpenShortcut(sharedText) }
+                lifecycleScope.launch(dispatcherProvider.io()) { viewModel.onOpenShortcut(sharedText) }
             } else if (intent.getBooleanExtra(LAUNCH_FROM_FAVORITES_WIDGET, false)) {
                 Timber.d("Favorite clicked from widget $sharedText")
-                lifecycleScope.launch { viewModel.onOpenFavoriteFromWidget(query = sharedText) }
+                lifecycleScope.launch(dispatcherProvider.io()) { viewModel.onOpenFavoriteFromWidget(query = sharedText) }
                 return
             } else {
                 Timber.w("opening in new tab requested for $sharedText")
-                lifecycleScope.launch { viewModel.onOpenInNewTabRequested(query = sharedText, skipHome = true) }
+                lifecycleScope.launch(dispatcherProvider.io()) { viewModel.onOpenInNewTabRequested(query = sharedText, skipHome = true) }
                 return
             }
         }
@@ -351,7 +355,7 @@ open class BrowserActivity : DuckDuckGoActivity() {
         viewModel.tabs.observe(this) {
             clearStaleTabs(it)
             removeOldTabs()
-            lifecycleScope.launch { viewModel.onTabsUpdated(it) }
+            lifecycleScope.launch(dispatcherProvider.io()) { viewModel.onTabsUpdated(it) }
         }
     }
 
@@ -423,6 +427,7 @@ open class BrowserActivity : DuckDuckGoActivity() {
             settingsDataStore = settingsDataStore,
             userEventsStore = userEventsStore,
             appCoroutineScope = appCoroutineScope,
+            dispatcherProvider = dispatcherProvider
         )
         dialog.clearStarted = {
             removeObservers()
@@ -436,14 +441,14 @@ open class BrowserActivity : DuckDuckGoActivity() {
     }
 
     fun launchNewTab() {
-        lifecycleScope.launch { viewModel.onNewTabRequested() }
+        lifecycleScope.launch(dispatcherProvider.io()) { viewModel.onNewTabRequested() }
     }
 
     fun openInNewTab(
         query: String,
         sourceTabId: String?,
     ) {
-        lifecycleScope.launch {
+        lifecycleScope.launch(dispatcherProvider.io()) {
             viewModel.onOpenInNewTabRequested(query = query, sourceTabId = sourceTabId)
         }
     }
@@ -452,7 +457,7 @@ open class BrowserActivity : DuckDuckGoActivity() {
         message: Message,
         sourceTabId: String?,
     ) {
-        openMessageInNewTabJob = lifecycleScope.launch {
+        openMessageInNewTabJob = lifecycleScope.launch(dispatcherProvider.io()) {
             val tabId = viewModel.onNewTabRequested(sourceTabId = sourceTabId)
             val fragment = openNewTab(tabId, null, false)
             fragment.messageFromPreviousTab = message
