@@ -60,7 +60,7 @@ class NetworkProtectionStateImpl @Inject constructor(
     }
 
     override fun restart() {
-        coroutineScope.launch {
+        coroutineScope.launch(dispatcherProvider.io()) {
             vpnFeaturesRegistry.refreshFeature(NetPVpnFeature.NETP_VPN)
         }
     }
