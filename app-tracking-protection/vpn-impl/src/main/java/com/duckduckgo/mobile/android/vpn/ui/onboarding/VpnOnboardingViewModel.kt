@@ -116,7 +116,7 @@ class VpnOnboardingViewModel @Inject constructor(
     }
 
     private fun sendCommand(newCommand: Command) {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcherProvider.io()) {
             command.send(newCommand)
         }
     }

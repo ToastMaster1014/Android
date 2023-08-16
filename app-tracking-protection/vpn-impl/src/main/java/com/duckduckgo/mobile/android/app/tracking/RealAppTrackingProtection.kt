@@ -49,7 +49,7 @@ class RealAppTrackingProtection @Inject constructor(
     }
 
     override fun restart() {
-        coroutineScope.launch {
+        coroutineScope.launch(dispatcherProvider.io()) {
             vpnFeaturesRegistry.refreshFeature(AppTpVpnFeature.APPTP_VPN)
         }
     }
