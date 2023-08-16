@@ -40,9 +40,9 @@ import com.duckduckgo.app.sitepermissions.permissionsperwebsite.WebsitePermissio
 import com.duckduckgo.di.scopes.ActivityScope
 import com.duckduckgo.mobile.android.ui.view.dialog.RadioListAlertDialogBuilder
 import com.duckduckgo.mobile.android.ui.viewbinding.viewBinding
+import javax.inject.Inject
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @InjectWith(ActivityScope::class)
 class PermissionsPerWebsiteActivity : DuckDuckGoActivity() {

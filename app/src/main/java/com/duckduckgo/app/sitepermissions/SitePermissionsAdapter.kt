@@ -180,7 +180,7 @@ class SitePermissionsAdapter(
 
     class SitePermissionToggleViewHolder(
         private val binding: ViewSitePermissionsToggleBinding,
-        private val dispatcherProvider: DispatcherProvider
+        private val dispatcherProvider: DispatcherProvider,
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(
             item: SitePermissionToggle,
